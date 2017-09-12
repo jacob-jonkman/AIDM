@@ -13,7 +13,6 @@ def naive_item(data, num_movies):
 	itemcounts = np.zeros(num_movies)
 	
 	for i in np.arange(len(data)):
-		print(i)
 		itemratings[data[i,1] - 1] += data[i,2]
 		itemcounts[data[i,1] - 1] += 1
 	
@@ -32,8 +31,35 @@ def naive_user(data, num_users):
 	return np.round(userratings/usercounts, 1)
 
 
-def naive_user_item(user, item, data):
-	pass
+def naive_model(data, num_users, num_movies):#user, item):
+	def model(X, a, b, c):
+		x1, x2 = X
+		return a*x1 + b*x2 + c
+		
+	#Can be used to make a fit to a model
+	from scipy.optimize import curve_fit
+	#https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+	#returns the best values for the parameters of the model in the array popt
+	#the array pcov contains the estimated covariance of popt
+	#p0 are the values for the variables it will start to look 
+	
+	x1 = naive_user(train_set, num_users)
+	x2 = naive_item(train_set, num_movies)
+	
+	print("hier!!!!!")
+	print(x1, x2)
+	
+	popt, pcov = curve_fit(model, (x1, x2), ydata, p0 = (1000., 1.))
+	#Then the standard deviation is given by:
+	perr = np.sqrt(np.diag(pcov))
+	#get the residuals:
+	residuals = ydata- model(xdata, popt)
+	#to get R^2:
+	ss_res = np.sum(residuals**2)
+	ss_tot = np.sum((ydata-np.mean(ydata))**2)
+	r_squared = 1 - (ss_res / ss_tot)
+	
+	
 
 
 ## Squeeze ratings into range 1 to 5
@@ -55,7 +81,7 @@ def main():
 	sum_naive_global = 0
 	sum_naive_item = 0
 	sum_naive_user = 0
-	sum_naive_user_item = 0
+	sum_naive_model = 0
 	
 	num_users = count_distinct(data[:,0])
 	num_movies = count_distinct(data[:,1])
@@ -67,6 +93,7 @@ def main():
 		sum_naive_global += naive_global(train_set[:,2])
 		sum_naive_user += naive_user(train_set, num_users)
 		sum_naive_item += naive_item(train_set, num_movies)
+		sum_naive_model += naive_model(train_set, num_users, num_movies)
 		
 	print("mean of naive global classifier: ", sum_naive_global/folds)
 	print("means of naive user classifier: ", sum_naive_user/folds)
