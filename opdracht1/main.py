@@ -16,11 +16,10 @@ def naive_item(data):
 def naive_user(data, num_users):
 	userratings = np.zeros(num_users)
 	usercounts = np.zeros(num_users)
-	i=0
-	while(i < len(data)):
+
+	for i in range(len(data)):
 		userratings[data[i,0]-1] += data[i,2]
 		usercounts[data[i,0]-1] += 1
-		i+=1
 		
 	return np.round(userratings/usercounts, 1)
 
