@@ -9,6 +9,7 @@ def naive_global(ratings):
 
 
 def naive_item(data):
+	#Jelle does this
 	pass
 
 
