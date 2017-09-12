@@ -8,11 +8,19 @@ def naive_global(ratings):
 	return np.mean(ratings)
 
 
-def naive_item(data):
-	#Jelle does this
-	pass
+def naive_item(data, num_movies):
+	itemratings = np.zeros(num_movies)
+	itemcounts = np.zeros(num_movies)
+	
+	for i in np.arange(len(data)):
+		print(i)
+		itemratings[data[i,1] - 1] += data[i,2]
+		itemcounts[data[i,1] - 1] += 1
+	
+	return np.round(itemratings/itemcounts, 1)
 
 
+# Compute mean rating per user
 def naive_user(data, num_users):
 	userratings = np.zeros(num_users)
 	usercounts = np.zeros(num_users)
@@ -34,26 +42,24 @@ def roundRatings(ratings):
 	return(np.array([max(min(x, maxRating), minRating) for x in ratings]))
 
 
-def count_distinct_users(data):
-	return len(np.unique(data))
-
-
-def count_distinct_movies(data):
-	return len(np.unique(data))
+def count_distinct(lst):
+	return np.max(lst)
 
 
 def main():
-	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int', max_rows=1000)
+	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int', max_rows=100000)
 	
 	data[:,2] = roundRatings(data[:,2])
+	
+	
 
 	sum_naive_global = 0
 	sum_naive_item = 0
 	sum_naive_user = 0
 	sum_naive_user_item = 0
 	
-	num_users = count_distinct_users(data[:,0])
-	num_movies = count_distinct_movies(data[:,1])
+	num_users = count_distinct(data[:,0])
+	num_movies = count_distinct(data[:,1])
 	
 	for fold in range(folds):
 		train_set = np.array([data[x] for x in range(len(data)) if (x%5) != fold])
@@ -61,10 +67,11 @@ def main():
 		
 		sum_naive_global += naive_global(train_set[:,2])
 		sum_naive_user += naive_user(train_set, num_users)
-		sum_naive_item = naive_item(train_set)
+		sum_naive_item += naive_item(train_set, num_movies)
 		
-	print("mean of naive global classifier: ", sum_naive_global/5)
-	print("means of naive user classifier: ", sum_naive_user/5)
+	print("mean of naive global classifier: ", sum_naive_global/folds)
+	print("means of naive user classifier: ", sum_naive_user/folds)
+	print("means of naive item classifier: ", sum_naive_item/folds)
 		
 		
 	
