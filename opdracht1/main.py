@@ -12,6 +12,7 @@ def naive_item(data):
 	pass
 
 
+# Compute mean rating per user
 def naive_user(data, num_users):
 	userratings = np.zeros(num_users)
 	usercounts = np.zeros(num_users)
