@@ -39,6 +39,7 @@ def naive_model(lin_reg_data, ratings):
 	reg = linear_model.LinearRegression()
 	reg.fit(lin_reg_data, ratings)	
 	return reg.coef_
+	
 
 ## Squeeze ratings into range 1 to 5
 def roundRatings(ratings):
@@ -53,37 +54,71 @@ def main():
 	# and every userID lower than the biggest one in the data occurs at least once.
 	num_users = np.max(data[:,0])
 	num_movies = np.max(data[:,1])
-	print("users: ", num_users, "items:", num_movies)
 		
-	global_average_ratings = np.zeros(folds)
-	naive_user_ratings = np.zeros(num_users)
-	naive_item_ratings = np.zeros(num_movies)
+	# Initialize several lists used in training and testing
+	global_average_ratings_train = np.zeros(folds)
+	user_ratings_train = np.zeros(num_users)
+	item_ratings_train = np.zeros(num_movies)
+	global_average_ratings_test = np.zeros(folds)
+	user_ratings_test = np.zeros(num_users)
+	item_ratings_test = np.zeros(num_movies)
+	
+	# Lists to store the errors over the folds
+	err_train_gar = np.zeros(folds)
+	err_train_urt = np.zeros(folds)
+	err_train_irt = np.zeros(folds)
+	err_test_gar = np.zeros(folds)
+	err_test_urt = np.zeros(folds)
+	err_test_irt = np.zeros(folds)
 	
 	# Apply 5-fold cross validation
 	for fold in np.arange(folds):
-		print("fold", fold, end="")
-		
-		train_set = np.array([data[x] for x in np.arange(len(data)) if (x%5) != fold])
-		test_set = np.array([data[x] for x in np.arange(len(data)) if (x%5) == fold])
-		
-		global_average_ratings[fold] = naive_global(train_set[:,2])
-		naive_user_ratings += naive_user(train_set, num_users, global_average_ratings[fold])
-		naive_item_ratings += naive_item(train_set, num_movies, global_average_ratings[fold])
-		
-		print(" done")
-		
-	naive_user_ratings /= folds
-	naive_item_ratings /= folds
-	
-	# Construct lin_reg_data = [avg for user, avg for movie]
-	lin_reg_data = np.zeros((len(data), 2))
-	for i in range(len(data)):
-		lin_reg_data[i,0] = naive_user_ratings[data[i,0]-1]
-		lin_reg_data[i,1] = naive_item_ratings[data[i,1]-1]
-	
-	regression_coeffs = naive_model(lin_reg_data, data[:,2])
-	print("Linear Regression done. Coefficients:", regression_coeffs)
+		print("Start fold", fold)
 
+		train_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) != fold])
+		test_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) == fold])
+		
+		# Apply the naive classifiers on the train set
+		global_average_ratings_train[fold] = naive_global(train_set[:,2])
+		user_ratings_train = naive_user(train_set, num_users, global_average_ratings_train[fold])
+		item_ratings_train = naive_item(train_set, num_movies, global_average_ratings_train[fold])
+		
+		# Construct avg_ratings_list_train = [avg for user, avg for movie] for all data in train set
+		avg_ratings_list_train = np.zeros((len(train_set), 2))
+		for i in np.arange(len(train_set)):
+			avg_ratings_list_train[i,0] = user_ratings_train[data[i,0]-1]
+			avg_ratings_list_train[i,1] = item_ratings_train[data[i,1]-1]
+
+		# Apply the naive classifiers on the test set
+		global_average_ratings_test[fold] = naive_global(test_set[:,2])
+		user_ratings_test = naive_user(test_set, num_users, global_average_ratings_test[fold])
+		item_ratings_test = naive_item(test_set, num_movies, global_average_ratings_test[fold])
+		
+		# Construct avg_ratings_list_test = [avg for user, avg for movie] for all data in train set
+		avg_ratings_list_test = np.zeros((len(test_set), 2))
+		for i in np.arange(len(test_set)):
+			avg_ratings_list_test[i,0] = user_ratings_test[data[i,0]-1]
+			avg_ratings_list_test[i,1] = item_ratings_test[data[i,1]-1]
+		
+		# apply the naive models to the train set:
+		err_train_gar[fold] = np.sqrt(np.mean((train_set[:,2] - global_average_ratings_test[fold])**2))
+		err_train_urt[fold] = np.sqrt(np.mean((train_set[:,2] - avg_ratings_list_train[:,0])**2))
+		err_train_irt[fold] = np.sqrt(np.mean((train_set[:,2] - avg_ratings_list_train[:,1])**2))
+		
+		# apply the naive models to the test set:
+		err_test_gar[fold]	= np.sqrt(np.mean((test_set[:,2] - global_average_ratings_test[fold])**2))
+		err_test_urt[fold]	= np.sqrt(np.mean((test_set[:,2] - avg_ratings_list_test[:,0])**2))
+		err_test_irt[fold]	= np.sqrt(np.mean((test_set[:,2] - avg_ratings_list_test[:,1])**2))
+	
+		# Print errors, both for the train and the test set
+		print("errors on train set:", err_train_gar[fold], err_train_urt[fold], err_train_irt[fold])
+		print("errors on test set:", err_test_gar[fold], err_test_urt[fold], err_test_irt[fold])
+		
+		# Apply Linear Regression
+		regression_coeffs = naive_model(avg_ratings_list_train, train_set[:,2])
+		print("Linear Regression done. Coefficients:", regression_coeffs)
+		
+		print()
 
 if __name__ == "__main__":
 	main()
