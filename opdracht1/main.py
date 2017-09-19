@@ -34,11 +34,11 @@ def naive_user(data, num_users, global_average_rating):
 	return np.round([userratings[j]/usercounts[j] if usercounts[j] > 0 else global_average_rating for j in range(num_users)], 1)
 
 
-# Use linear regression
-def naive_model(lin_reg_data, ratings):
+# Compute Linear Regression Coefficients
+def linearRegression(lin_reg_data, ratings):
 	reg = linear_model.LinearRegression()
 	reg.fit(lin_reg_data, ratings)	
-	return reg.coef_
+	return reg.coef_, reg.intercept_
 	
 
 ## Squeeze ratings into range 1 to 5
@@ -49,12 +49,12 @@ def roundRatings(ratings):
 def applyNaiveModels(data, user_ratings, item_ratings, avg_ratings_list, global_average_rating):
 	errors = np.zeros(3)
 	
-	# Construct avg_ratings_list_train = [avg for user, avg for movie] for all data in train set
+	# Construct avg_ratings_list_train = [avg for user, avg for movie] for the passed data
 	for i in np.arange(len(data)):
 		avg_ratings_list[i,0] = user_ratings[data[i,0]-1]
 		avg_ratings_list[i,1] = item_ratings[data[i,1]-1]
 	
-	# apply the naive models to the train set and compute errors
+	# apply the naive models to the data and compute errors
 	errors[0] = np.sqrt(np.mean((data[:,2] - global_average_rating)**2))
 	errors[1] = np.sqrt(np.mean((data[:,2] - avg_ratings_list[:,0])**2))
 	errors[2] = np.sqrt(np.mean((data[:,2] - avg_ratings_list[:,1])**2))
@@ -105,8 +105,15 @@ def main():
 		print("errors on test set:", errors_test[fold, 0], errors_test[fold, 1], errors_test[fold, 2])
 		
 		# Apply Linear Regression
-		regression_coeffs = naive_model(avg_ratings_list_train, train_set[:,2])
-		print("Linear Regression done. Coefficients:", regression_coeffs)
+		regr_coeffs, regr_intercept = linearRegression(avg_ratings_list_train, train_set[:,2])
+		
+		
+		regr_error_train = np.sqrt(np.mean((train_set[:,2] - (regr_coeffs[0]*avg_ratings_list_train[:,0] + regr_coeffs[1]*avg_ratings_list_train[:,1] + regr_intercept))**2))
+		regr_error_test = np.sqrt(np.mean((test_set[:,2] - (regr_coeffs[0]*avg_ratings_list_test[:,0] + regr_coeffs[1]*avg_ratings_list_test[:,1] + regr_intercept))**2))
+		
+		print("Linear Regression done. Coefficients:", regr_coeffs, regr_intercept)
+		print("Training error:", regr_error_train)
+		print("Test error:", regr_error_test)
 		
 		print()
 
