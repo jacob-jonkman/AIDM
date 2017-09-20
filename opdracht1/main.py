@@ -59,7 +59,7 @@ def applyNaiveModels(data, user_ratings, item_ratings, avg_ratings_list, global_
 		avg_ratings_list[i,0] = user_ratings[data[i,0]-1]
 		avg_ratings_list[i,1] = item_ratings[data[i,1]-1]
 	
-	# apply the naive models to the data and compute errors
+	# Apply the naive models to the data and compute errors
 	errors[0] = np.sqrt(np.mean((data[:,2] - global_average_rating)**2))
 	errors[1] = np.sqrt(np.mean((data[:,2] - avg_ratings_list[:,0])**2))
 	errors[2] = np.sqrt(np.mean((data[:,2] - avg_ratings_list[:,1])**2))
@@ -67,7 +67,7 @@ def applyNaiveModels(data, user_ratings, item_ratings, avg_ratings_list, global_
 	return errors, avg_ratings_list
 
 def Xmatrix(data, num_users, num_movies):
-  #Convert the data set to the IxJ matrix  
+  # Convert the data set to the IxJ matrix  
   X = np.zeros((num_users, num_movies)) * np.nan
   for i in np.arange(len(data)):
     X[data[i,0]-1,data[i,1]-1] = data[i,2]
@@ -75,13 +75,13 @@ def Xmatrix(data, num_users, num_movies):
   return X
 
 def matrixFact(data, num_users, num_movies):
-	#Convert the data set to the IxJ matrix  
+	# Convert the data set to the IxJ matrix  
 	X_data = Xmatrix(data, num_users, num_movies)
 
 	X_hat = np.zeros(num_users, num_movies) #The matrix of predicted ratings
 	E = np.zeros(num_users, num_movies) #The error values 
 	
-	#The matrices used to determine the ratings. These are initialized with random values and then converged to optimum values using gradient descent.
+	# The matrices used to determine the ratings. These are initialized with random values and then converged to optimum values using gradient descent.
 	U = np.random.rand(num_users, num_factors) 
 	M = np.random.rand(num_factors, num_movies)
 	U_prime = U
@@ -91,12 +91,11 @@ def matrixFact(data, num_users, num_movies):
 		for i in np.arange(len(data)):
 			userId = data[i,0] - 1
 			movieId = data[i,1] - 1
-			actual = data[i,2]
-			#print(U[userId,:], M[:,movieId], U[userId,:] * M[:,movieId])
+			actual = data[i,2]			
 			prediction = np.sum(U[userId,:] * M[:,movieId])
 			error = actual - prediction
-			#print(actual, prediction, error)
 			
+			# Update U and M by building U_prime and M_prime, which will replace U and M when done with this iteration
 			for k in np.arange(num_factors):
 				U_prime[userId, k]  = U[userId, k]  + learn_rate * (2 * error * M[k, movieId] - regularization * U[userId, k])
 				M_prime[k, movieId] = M[k, movieId] + learn_rate * (2 * error * U[userId, k]  - regularization * M[k, movieId])
@@ -104,12 +103,14 @@ def matrixFact(data, num_users, num_movies):
 		U = U_prime
 		M = M_prime
 		
+		# Compute intermediate MSE
 		X_hat = np.dot(U,M)
 		E = X_data - X_hat
 		intermediate_error = np.sqrt(np.mean(E[np.where(np.isnan(E) == False)]**2))
 		
 		print("Iteration", q, "out of", num_iter, "done. Error:", intermediate_error)
 	
+	# Apply U and M one last time and return the result
 	X_hat = np.dot(U,M)
 	return X_hat
       
