@@ -75,39 +75,43 @@ def Xmatrix(data, num_users, num_movies):
   return X
 
 def matrixFact(data, num_users, num_movies):
-  #Convert the data set to the IxJ matrix  
-  X_data = Xmatrix(data, num_users, num_movies)
+	#Convert the data set to the IxJ matrix  
+	X_data = Xmatrix(data, num_users, num_movies)
+
+	X_hat = np.zeros(num_users, num_movies) #The matrix of predicted ratings
+	E = np.zeros(num_users, num_movies) #The error values 
+	
+	#The matrices used to determine the ratings. These are initialized with random values and then converged to optimum values using gradient descent.
+	U = np.random.rand(num_users, num_factors) 
+	M = np.random.rand(num_factors, num_movies)
+	U_prime = U
+	M_prime = M
   
-  X_hat = np.zeros(num_users, num_movies) #The 'weights', aka the expected values of the ratings
-  E = np.zeros(num_users, num_movies) #The error values 
-  #The matrices used to determine the ratings. These are initialized with random values and then converged to optimum values using gradient descent.
-  U = np.random.rand(num_users, num_factors) 
-  M = np.random.rand(num_factors, num_movies)
-  U_prime = np.zeros((num_users, num_factors))
-  M_prime = np.zeros((num_factors, num_movies))
-  
-  for q in range(num_iter):
-    X_hat = np.dot(U,M)
-    
-    E = X_data - X_hat
-    """
-    for i in np.arange(num_users):
-      for j in np.arange(num_movies):
-        for k in np.arange()
-        U_prime = U + learn_rate * (2. * E * M - regularization * U)
-        M_prime = M + learn_rate * (2. * E * U - regulalrization * M)
-      
-    
-    U = U_prime
-    M = M_prime
-    """
-  X_hat = np.dot(U,M)
-  
-  X_hat_errcalc = X_hat
-  X_hat_errcalc[np.where(X_data == np.nan)] = np.nan
-  
-  E = X_data - X_hat_errcalc
-  return X_hat
+	for q in np.arange(num_iter):
+		for i in np.arange(len(data)):
+			userId = data[i,0] - 1
+			movieId = data[i,1] - 1
+			actual = data[i,2]
+			#print(U[userId,:], M[:,movieId], U[userId,:] * M[:,movieId])
+			prediction = np.sum(U[userId,:] * M[:,movieId])
+			error = actual - prediction
+			#print(actual, prediction, error)
+			
+			for k in np.arange(num_factors):
+				U_prime[userId, k]  = U[userId, k]  + learn_rate * (2 * error * M[k, movieId] - regularization * U[userId, k])
+				M_prime[k, movieId] = M[k, movieId] + learn_rate * (2 * error * U[userId, k]  - regularization * M[k, movieId])
+
+		U = U_prime
+		M = M_prime
+		
+		X_hat = np.dot(U,M)
+		E = X_data - X_hat
+		intermediate_error = np.sqrt(np.mean(E[np.where(np.isnan(E) == False)]**2))
+		
+		print("Iteration", q, "out of", num_iter, "done. Error:", intermediate_error)
+	
+	X_hat = np.dot(U,M)
+	return X_hat
       
 
 def main():
@@ -123,8 +127,8 @@ def main():
 	user_ratings = np.zeros(num_users)
 	item_ratings = np.zeros(num_movies)
 	
-	errors_train = np.zeros((folds, 3))
-	errors_test  = np.zeros((folds, 3))
+	naive_errors_train = np.zeros((folds, 3))
+	naive_errors_test  = np.zeros((folds, 3))
 	
 	np.random.seed(17)
 	
@@ -147,12 +151,12 @@ def main():
 		avg_ratings_list_test = np.zeros((len(test_set), 2))
 		
 		# Apply the models on the train and test set
-		errors_train[fold,:], avg_ratings_list_train = applyNaiveModels(train_set, user_ratings, item_ratings, avg_ratings_list_train, global_average_rating)
-		errors_test[fold,:], avg_ratings_list_test = applyNaiveModels(test_set, user_ratings, item_ratings, avg_ratings_list_test, global_average_rating)
+		naive_errors_train[fold,:], avg_ratings_list_train = applyNaiveModels(train_set, user_ratings, item_ratings, avg_ratings_list_train, global_average_rating)
+		naive_errors_test[fold,:], avg_ratings_list_test = applyNaiveModels(test_set, user_ratings, item_ratings, avg_ratings_list_test, global_average_rating)
 		
 		# Print errors, both for the train and the test set
-		print("errors on train set:", errors_train[fold, 0], errors_train[fold, 1], errors_train[fold, 2])
-		print("errors on test set:", errors_test[fold, 0], errors_test[fold, 1], errors_test[fold, 2])
+		print("errors on train set:", naive_errors_train[fold, 0], naive_errors_train[fold, 1], naive_errors_train[fold, 2])
+		print("errors on test set:", naive_errors_test[fold, 0], naive_errors_test[fold, 1], naive_errors_test[fold, 2])
 		
 		# Apply Linear Regression
 		regr_coeffs, regr_intercept = linearRegression(avg_ratings_list_train, train_set[:,2])
@@ -174,8 +178,8 @@ def main():
 		E_train = X_train - X_hat
 		E_test = X_test - X_hat
 		
-		MF_error_train = np.sqrt(np.mean(E_train[np.where(E_train != np.nan)]**2))
-		MF_error_test = np.sqrt(np.mean(E_test[np.where(E_test != np.nan)]**2))
+		MF_error_train = np.sqrt(np.mean(E_train[np.where(np.isnan(E_train) == False)]**2))
+		MF_error_test = np.sqrt(np.mean(E_test[np.where(np.isnan(E_test) == False)]**2))
 		
 		print('MF training set error:', MF_error_train)
 		print('MF test set error:', MF_error_test)
