@@ -1,14 +1,13 @@
 import numpy as np
 from sklearn import linear_model
-from multiprocessing import Pool
 
 maxRating = 5
 minRating = 1
 folds = 5
 
-num_factors = 40
+num_factors = 10
 num_iter = 75
-regularization = 0.005
+regularization = 0.05
 learn_rate = 0.005
 
 
@@ -115,11 +114,11 @@ def matrixFact(data, num_users, num_movies):
 	# Apply U and M one last time and return the result
 	X_hat = np.dot(U,M)
 	return X_hat
-  
+
 
 def main():
 	## Read dataset into data with format [userID, movieID, rating]
-	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int', max_rows = 10000)
+	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int')
 	
 	# Compute the number of users and movies in the data. This assumes that every movieID 
 	# and every userID lower than the biggest one in the data occurs at least once.
@@ -170,7 +169,6 @@ def main():
 		print("Linear Regression done. Coefficients:", regr_coeffs, regr_intercept)
 		print("Training error:", regr_error_train)
 		print("Test error:", regr_error_test)
-		
 		
 		X_hat = matrixFact(train_set, num_users, num_movies)
 		X_train = Xmatrix(train_set, num_users, num_movies)
