@@ -1,14 +1,21 @@
 import numpy as np
 from sklearn import linear_model
+from multiprocessing import Pool
 
 maxRating = 5
 minRating = 1
 folds = 5
 
-num_factors = 10
+num_factors = 40
 num_iter = 75
-regularization = 0.05
+regularization = 0.005
 learn_rate = 0.005
+
+num_users = 0
+num_movies = 0
+
+naive_errors_train = np.zeros((folds, 3))
+naive_errors_test  = np.zeros((folds, 3))
 
 # Compute the mean of all ratings in the data
 def naive_global(ratings):
@@ -74,7 +81,7 @@ def Xmatrix(data, num_users, num_movies):
     
   return X
 
-def matrixFact(data, num_users, num_movies):
+def matrixFact(data, num_users, num_movies, fold):
 	# Convert the data set to the IxJ matrix  
 	X_data = Xmatrix(data, num_users, num_movies)
 
@@ -108,33 +115,88 @@ def matrixFact(data, num_users, num_movies):
 		E = X_data - X_hat
 		intermediate_error = np.sqrt(np.mean(E[np.where(np.isnan(E) == False)]**2))
 		
-		print("Iteration", q, "out of", num_iter, "done. Error:", intermediate_error)
+		print("Fold", fold, "Iteration", q, "out of", num_iter, "done. Error:", intermediate_error)
 	
 	# Apply U and M one last time and return the result
 	X_hat = np.dot(U,M)
 	return X_hat
-      
+  
+  
+def doFold(fold):
+	global data
+	global num_users
+	global num_movies
+
+	# Shuffle the data and divide in train and test set
+	np.random.shuffle(data)
+	train_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) != fold])
+	test_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) == fold])
+
+	# Initialize lists to store the average ratings per movie and user, as well as the errors per model per fold
+	user_ratings = np.zeros(num_users)
+	item_ratings = np.zeros(num_movies)
+
+	# Compute the naive classifiers on the train set
+	global_average_rating = naive_global(train_set[:,2])
+	user_ratings = naive_user(train_set, num_users, global_average_rating)
+	item_ratings = naive_item(train_set, num_movies, global_average_rating)
+
+	avg_ratings_list_train = np.zeros((len(train_set), 2))
+	avg_ratings_list_test = np.zeros((len(test_set), 2))
+
+	# Apply the models on the train and test set
+	naive_errors_train[fold,:], avg_ratings_list_train = applyNaiveModels(train_set, user_ratings, item_ratings, avg_ratings_list_train, global_average_rating)
+	naive_errors_test[fold,:], avg_ratings_list_test = applyNaiveModels(test_set, user_ratings, item_ratings, avg_ratings_list_test, global_average_rating)
+
+	# Print errors, both for the train and the test set
+	print("Fold", fold, "errors on train set:", naive_errors_train[fold, 0], naive_errors_train[fold, 1], naive_errors_train[fold, 2])
+	print("Fold", fold, "errors on test set:", naive_errors_test[fold, 0], naive_errors_test[fold, 1], naive_errors_test[fold, 2])
+
+	# Apply Linear Regression
+	regr_coeffs, regr_intercept = linearRegression(avg_ratings_list_train, train_set[:,2])
+	regression_predictions_train = roundRatings(regr_coeffs[0]*avg_ratings_list_train[:,0] + regr_coeffs[1]*avg_ratings_list_train[:,1] + regr_intercept)
+	regression_predictions_test = roundRatings(regr_coeffs[0]*avg_ratings_list_test[:,0] + regr_coeffs[1]*avg_ratings_list_test[:,1] + regr_intercept)
+
+	regr_error_train = np.sqrt(np.mean((train_set[:,2] - regression_predictions_train)**2))
+	regr_error_test = np.sqrt(np.mean((test_set[:,2] - regression_predictions_test)**2))
+
+	print("Fold", fold, "Linear Regression done. Coefficients:", regr_coeffs, regr_intercept)
+	print("Fold", fold, "Training error using linear regression:", regr_error_train)
+	print("Fold", fold, "Test error using linear regression:", regr_error_test)
+
+	X_hat = matrixFact(train_set, num_users, num_movies, fold)
+	X_train = Xmatrix(train_set, num_users, num_movies)
+	X_test = Xmatrix(test_set, num_users, num_movies)
+
+	E_train = X_train - X_hat
+	E_test = X_test - X_hat
+
+	MF_error_train = np.sqrt(np.mean(E_train[np.where(np.isnan(E_train) == False)]**2))
+	MF_error_test = np.sqrt(np.mean(E_test[np.where(np.isnan(E_test) == False)]**2))
+
+	print("Fold", fold, 'MF training set error:', MF_error_train)
+	print("Fold", fold, 'MF test set error:', MF_error_test)
 
 def main():
+	global data
+	global num_users
+	global num_movies
+
 	## Read dataset into data with format [userID, movieID, rating]
-	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int', max_rows=10000)
+	data = np.genfromtxt("ml-1m/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int', max_rows = 10000)
 	
 	# Compute the number of users and movies in the data. This assumes that every movieID 
 	# and every userID lower than the biggest one in the data occurs at least once.
 	num_users = np.max(data[:,0])
 	num_movies = np.max(data[:,1])
-		
-	# Initialize lists to store the average ratings per movie and user, as well as the errors per model per fold
-	user_ratings = np.zeros(num_users)
-	item_ratings = np.zeros(num_movies)
-	
-	naive_errors_train = np.zeros((folds, 3))
-	naive_errors_test  = np.zeros((folds, 3))
 	
 	np.random.seed(17)
-	
+	pool = Pool()
+	pool.map(doFold, range(folds))
+	"""
 	# Apply 5-fold cross validation
 	for fold in np.arange(folds):
+		
 		print("Start fold", fold)
 		
 		# Shuffle the data and divide in train and test set
@@ -142,7 +204,7 @@ def main():
 		train_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) != fold])
 		test_set = np.array([data[x] for x in np.arange(len(data)) if (x % folds) == fold])
 		
-		"""
+		
 		# Compute the naive classifiers on the train set
 		global_average_rating = naive_global(train_set[:,2])
 		user_ratings = naive_user(train_set, num_users, global_average_rating)
@@ -170,7 +232,7 @@ def main():
 		print("Linear Regression done. Coefficients:", regr_coeffs, regr_intercept)
 		print("Training error:", regr_error_train)
 		print("Test error:", regr_error_test)
-		"""
+		
 		
 		X_hat = matrixFact(train_set, num_users, num_movies)
 		X_train = Xmatrix(train_set, num_users, num_movies)
@@ -184,6 +246,7 @@ def main():
 		
 		print('MF training set error:', MF_error_train)
 		print('MF test set error:', MF_error_test)
+"""
 
 if __name__ == "__main__":
 	main()
