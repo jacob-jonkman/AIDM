@@ -1,6 +1,6 @@
 import numpy as np
-import loglogcounting
-import cointoss
+import loglogcounting as llc
+import cointoss as ct
 
 numrows = 1000
 numbits = 20
@@ -8,10 +8,10 @@ numbits = 20
 def main():
 	np.set_printoptions(threshold=np.nan)
 	bitarray = np.random.randint(2, size=(numrows, numbits))
-	bitstrings = ''.join(str(e).replace(' ','') for e in bitarray)
+	bitstrings = np.array([str(e).replace(' ','').replace('[','').replace(']','') for e in bitarray])
 	
-	loglogcount(bitstrings)
-	cointoss(bitstrings)
+	llcount = llc.loglogcount(bitstrings)
+	#cointoss(bitstrings)
 	
 	print(bitstrings)
 
