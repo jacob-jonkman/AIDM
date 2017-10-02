@@ -1,9 +1,10 @@
 import numpy as np
 import loglogcounting as llc
 import cointoss as ct
+from timeit import default_timer
 
 numrows = 1000
-numbits = 10
+numbits = 12
 
 def counttrue(bitstrings):
 	"""
@@ -26,12 +27,18 @@ def main():
 	bitarray = np.random.randint(2, size=(numrows, numbits))
 	bitstrings = np.array([str(e).replace(' ','').replace('[','').replace(']','') for e in bitarray])
 	
+		#normal counting
+	starttime = default_timer()
 	truecount = counttrue(bitstrings)
 	print('The true amount of unique elements:', truecount)
+	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	
 	#llcount = llc.loglogcount(bitstrings)
+		#cointoss
+	starttime = default_timer()
 	ctcount = ct.cointoss(bitstrings)
 	print("Cointoss count:", ctcount)
+	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	
 	#print(bitstrings)
 

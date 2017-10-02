@@ -1,13 +1,24 @@
 import numpy as np
 
-def cointoss(bitstring):
+def cointoss(bitstrings):
 	
-	rho = np.zeros(len(bitstring[0])) #rank of the first bit which is 1 in the bitstring
+	rho = np.zeros(len(bitstrings[0])) #list recording which 1 bits have been found
 
-	for bit in bitstring:
-		for j in np.arange(len(bit)):
-			if bit[j] and rho == j - 1:
-				rho += 1
+	for word in bitstrings:
+		for j in np.arange(len(word)):
+			if word[j] == '1':
+				rho[j] = 1
 				break
-	print(rho)
-	return 10**rho
+				
+	print('Rho:', rho)
+	
+	#find up to which element in rho we have a 1 (so, find R)
+	R = 0
+	for r in rho:
+		if r == 0:
+			break
+		R += 1
+		
+	print('R:', R)
+	
+	return 2**R
