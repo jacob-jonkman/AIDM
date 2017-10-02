@@ -1,7 +1,7 @@
 import numpy as np
 import otherFunctions as oF
 
-def cointoss(bitstrings):
+def cointoss(bitstrings, printprogress = True):
 
 	print('\n--------- Cointoss ---------')
 	
@@ -9,9 +9,9 @@ def cointoss(bitstrings):
 	
 	looplength = len(bitstrings)
 	
-
 	for i in np.arange(looplength):
-		oF.progress(i, looplength)
+		if printprogress:
+			oF.progress(i, looplength)
 		for j in np.arange(len(bitstrings[i])):
 			if bitstrings[i][j] == '1':
 				rho[j] = 1
