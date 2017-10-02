@@ -2,24 +2,21 @@ import numpy as np
 import loglogcounting as llc
 import cointoss as ct
 
-numrows = 10
-numbits = 20
+numrows = 1000
+numbits = 10
 
 def counttrue(bitstrings):
 	"""
 	Count the true number of distinct elements
 	"""
-	#list of all unique elements
-	unique = [bitstrings[0], bitstrings[1]]
-	print(unique)
+	unique = [0] #initialisation is needed with at least one value
+
 	for word in bitstrings:
 		for un in unique:
 			if np.sum(unique == word) == 0:
 				unique = np.append(unique, word)
 	
-	print(unique)
-	
-	return len(unique)
+	return len(unique) - 1 #decrease by one, because of the initialization
 	
 	
 	return 0
@@ -33,7 +30,8 @@ def main():
 	print('The true amount of unique elements:', truecount)
 	
 	#llcount = llc.loglogcount(bitstrings)
-	#ctcount = ct.cointoss(bitstrings)
+	ctcount = ct.cointoss(bitstrings)
+	print("Cointoss count:", ctcount)
 	
 	#print(bitstrings)
 
