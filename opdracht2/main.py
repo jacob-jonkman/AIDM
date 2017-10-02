@@ -2,25 +2,31 @@ import numpy as np
 import loglogcounting as llc
 import cointoss as ct
 from timeit import default_timer
+import otherFunctions as oF
 
-numrows = 1000
-numbits = 12
+numrows = 2000
+numbits = 14
 
 def counttrue(bitstrings):
 	"""
-	Count the true number of distinct elements
+	Count the true number of distinct elements.
 	"""
+	print('\n--------- True Count ---------')
 	unique = [0] #initialisation is needed with at least one value
-
-	for word in bitstrings:
+	
+	#for displaying the progress
+	looplength = len(bitstrings)
+	
+	for i in np.arange(len(bitstrings)):
+		oF.progress(i, looplength)
+			
 		for un in unique:
-			if np.sum(unique == word) == 0:
-				unique = np.append(unique, word)
+			if np.sum(unique == bitstrings[i]) == 0:
+				unique = np.append(unique, bitstrings[i])
+	
+	print('\n') #make space for new prints
 	
 	return len(unique) - 1 #decrease by one, because of the initialization
-	
-	
-	return 0
 
 def main():
 	np.set_printoptions(threshold=np.nan)
