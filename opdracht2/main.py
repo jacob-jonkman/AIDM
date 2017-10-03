@@ -5,12 +5,12 @@ from timeit import default_timer
 import otherFunctions as oF
 import sys #for writing print statements to a log file
 
-numrows = int(1e5)
-numbits = 15
+numrows = int(1e6)
+numbits = 30
 
 #put all print statements in the log file. Set to false if you want only an
 #incomplete log, but get output in the terminal
-completelog = True
+completelog = False
 if completelog:
 	sys.stdout = open("Log.txt", "w")
 
@@ -71,7 +71,7 @@ def main():
 		log.write("\n\n------- New log -------\n")
 		log.write("numrows = {0}, numbits = {1}\n".format(numrows, numbits))
 	
-		#normal counting
+	#normal counting
 	starttime = default_timer()
 	truecount = counttrue(bitstrings, printprogress = True)
 	print('The true amount of unique elements: {0}'.format(truecount))
@@ -80,9 +80,16 @@ def main():
 		log.write('The true amount of unique elements: {0}\n'.format(truecount))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
-	#llcount = llc.loglogcount(bitstrings)
+	#loglog counting
+	starttime = default_timer()
+	llcount = llc.loglogcount(bitstrings, 10)
+	print("Loglog count: {0}, Error: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
+	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
+	if completelog == False:
+		log.write("Loglog count: {0}, Error: {1}%\n".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
+		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
-		#cointoss
+	#cointoss
 	starttime = default_timer()
 	ctcount = ct.cointoss(bitstrings, printprogress = True)
 	print("Cointoss count: {0}, Error: {1}%".format(ctcount, round(np.abs(truecount - ctcount)/truecount * 100., 3)))
@@ -90,7 +97,7 @@ def main():
 	if completelog == False:
 		log.write("Cointoss count: {0}, Error: {1}%\n".format(ctcount, round(np.abs(truecount - ctcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
-		
+	
 	if completelog == False:
 		log.close()
 	
