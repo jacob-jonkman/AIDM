@@ -34,7 +34,7 @@ def counttrue(bitstrings, printprogress = True):
 	intarray = bitstringsToInt(bitstrings)
 	
 	#array containing the frequency of each integer
-	intfreq = np.zeros(2**numbits, dtype = int)
+	intfreq = np.zeros(2**numbits, dtype = bool)
 	
 	#for displaying the progress
 	looplength = len(intarray)
@@ -43,7 +43,7 @@ def counttrue(bitstrings, printprogress = True):
 		if printprogress:
 			oF.progress(i, looplength)
 			
-		intfreq[intarray[i] - 1] += 1
+		intfreq[intarray[i] - 1] = True
 	
 	print('\n') #make space for new prints
 	
