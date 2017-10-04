@@ -29,21 +29,18 @@ def counttrue(bitstrings, printprogress = True):
 	Count the true number of distinct elements.
 	"""
 	print('\n--------- True Count ---------')
-	
-	#convert to integers to speed up the counting
-	intarray = bitstringsToInt(bitstrings)
-	
-	#array containing the frequency of each integer
+		
+	#array containing whether or not each integer exists in the bitstrings
 	intfreq = np.zeros(2**numbits, dtype = bool)
-	
+
 	#for displaying the progress
-	looplength = len(intarray)
+	looplength = len(bitstrings)
 	
-	for i in np.arange(len(intarray)):
+	for i in np.arange(looplength):
 		if printprogress:
 			oF.progress(i, looplength)
 			
-		intfreq[intarray[i] - 1] = True
+		intfreq[int(bitstrings[i], 2) - 1] = True
 	
 	print('\n') #make space for new prints
 	
