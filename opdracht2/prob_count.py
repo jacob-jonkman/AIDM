@@ -1,7 +1,7 @@
 import numpy as np
 import otherFunctions as oF
 
-def cointoss(bitstrings, printprogress = True):
+def prob_count(bitstrings, printprogress = True):
 
 	print('\n--------- Cointoss ---------')
 	

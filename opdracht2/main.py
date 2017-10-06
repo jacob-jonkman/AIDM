@@ -1,12 +1,12 @@
 import numpy as np
 import loglogcounting as llc
-import cointoss as ct
+import prob_count as pt
 from timeit import default_timer
 import otherFunctions as oF
 import sys #for writing print statements to a log file
 
 numrows = int(1e6)
-numbits = 30
+numbits = 25
 
 #put all print statements in the log file. Set to false if you want only an
 #incomplete log, but get output in the terminal
@@ -86,13 +86,13 @@ def main():
 		log.write("Loglog count: {0}, Error: {1}%\n".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
-	#cointoss
+	#probabilistic counting
 	starttime = default_timer()
-	ctcount = ct.cointoss(bitstrings, printprogress = True)
-	print("Cointoss count: {0}, Error: {1}%".format(ctcount, round(np.abs(truecount - ctcount)/truecount * 100., 3)))
+	ptcount = pt.prob_count(bitstrings, printprogress = True)
+	print("Probabilistic count: {0}, Error: {1}%".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
-		log.write("Cointoss count: {0}, Error: {1}%\n".format(ctcount, round(np.abs(truecount - ctcount)/truecount * 100., 3)))
+		log.write("Probabilistic count: {0}, Error: {1}%\n".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
 	if completelog == False:

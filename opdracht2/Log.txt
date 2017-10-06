@@ -1,10 +1,10 @@
 
 
 ------- New log -------
-numrows = 1000000, numbits = 30
-The true amount of unique elements: 999544
-Runtime: 7.148 seconds
-Loglog count: 2029092, Error: 103.002%
-Runtime: 3.772 seconds
-Cointoss count: 2097152, Error: 109.811%
-Runtime: 4.424 seconds
+numrows = 1000000, numbits = 10
+The true amount of unique elements: 1024
+Runtime: 1.905 seconds
+Loglog count: 813, Error: 20.605%
+Runtime: 3.588 seconds
+Probabilistic count: 1024, Error: 0.0%
+Runtime: 4.297 seconds
