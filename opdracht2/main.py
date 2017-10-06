@@ -5,8 +5,8 @@ from timeit import default_timer
 import otherFunctions as oF
 import sys #for writing print statements to a log file
 
-numrows = int(1e6)
-numbits = 25
+numrows = int(2**20)
+numbits = 20
 
 #put all print statements in the log file. Set to false if you want only an
 #incomplete log, but get output in the terminal
@@ -29,7 +29,7 @@ def counttrue(bitstrings, printprogress = True):
 	Count the true number of distinct elements.
 	"""
 	print('\n--------- True Count ---------')
-		
+	
 	#array containing whether or not each integer exists in the bitstrings
 	intfreq = np.zeros(2**numbits, dtype = bool)
 
@@ -48,6 +48,8 @@ def counttrue(bitstrings, printprogress = True):
 
 def main():
 	np.set_printoptions(threshold=np.nan)
+	
+	np.random.seed(42)
 	
 	#try to load the database of bitstrings. If this file is not present, create the data and save it to file
 	try:
@@ -79,7 +81,7 @@ def main():
 	
 	#loglog counting
 	starttime = default_timer()
-	llcount = llc.loglogcount(bitstrings, 10)
+	llcount = llc.loglogcount(bitstrings, 8)
 	print("Loglog count: {0}, RAE: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
