@@ -80,19 +80,19 @@ def main():
 	#loglog counting
 	starttime = default_timer()
 	llcount = llc.loglogcount(bitstrings, 10)
-	print("Loglog count: {0}, Error: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
+	print("Loglog count: {0}, RAE: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
-		log.write("Loglog count: {0}, Error: {1}%\n".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
+		log.write("Loglog count: {0}, RAE: {1}%\n".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
 	#probabilistic counting
 	starttime = default_timer()
 	ptcount = pt.prob_count(bitstrings, printprogress = True)
-	print("Probabilistic count: {0}, Error: {1}%".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
+	print("Probabilistic count: {0}, RAE: {1}%".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
-		log.write("Probabilistic count: {0}, Error: {1}%\n".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
+		log.write("Probabilistic count: {0}, RAE: {1}%\n".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
 	if completelog == False:
