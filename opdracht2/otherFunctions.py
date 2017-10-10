@@ -1,5 +1,14 @@
 import sys
 
+def rho(bitstring, numbits):
+	if bitstring == 0:
+		return numbits-1
+	p = 0
+	while (bitstring >> p) & 1 == 0:
+		p += 1
+	#print(p)
+	return p
+
 def progress(count, total, suffix='', printamount = 100):
 	"""
 	Prints a progress bar in the terminal, indicating the progress in percentage\n

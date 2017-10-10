@@ -1,14 +1,6 @@
 import numpy as np
 import otherFunctions as oF
 
-def rho(bitstring, numbits):
-	if bitstring == 0:
-		return numbits
-	p = 0
-	while (bitstring >> p) & 1 == 0:
-		p += 1
-	return p
-
 def prob_count(bitstrings, numbits, printprogress = True):
 
 	print('\n--------- Cointoss ---------')
@@ -20,7 +12,7 @@ def prob_count(bitstrings, numbits, printprogress = True):
 	for i in np.arange(looplength):
 		if printprogress:
 			oF.progress(i, looplength)
-		rholist[rho(bitstrings[i], numbits)] = 1
+		rholist[oF.rho(bitstrings[i], numbits)] = 1
 	
 	print('\n') #make space for new prints
 	print('Rho:', rholist)

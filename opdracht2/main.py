@@ -3,10 +3,11 @@ import loglogcounting as llc
 import prob_count as pt
 from timeit import default_timer
 import otherFunctions as oF
+import mmds
 import sys #for writing print statements to a log file
 
-numrows = int(1000000)
-numbits = 30
+numrows = int(100)
+numbits = 10
 
 #put all print statements in the log file. Set to false if you want only an
 #incomplete log, but get output in the terminal
@@ -69,7 +70,7 @@ def main():
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
 	
 	#loglog counting
-	starttime = default_timer()
+	"""starttime = default_timer()
 	llcount = llc.loglogcount(bitstrings, 10, numbits, printprogress=True)
 	print("Loglog count: {0}, RAE: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
@@ -85,6 +86,16 @@ def main():
 	if completelog == False:
 		log.write("Probabilistic count: {0}, RAE: {1}%\n".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
+	"""
+	#combinatorial counting
+	starttime = default_timer()
+	mmdscount = mmds.mmds_count(bitstrings, numbits, printprogress=True)
+	print("Loglog count: {0}, RAE: {1}%".format(mmdscount, round(np.abs(truecount - mmdscount)/truecount * 100., 3)))
+	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
+	if completelog == False:
+		log.write("Loglog count: {0}, RAE: {1}%\n".format(mmdscount, round(np.abs(truecount - mmdscount)/truecount * 100., 3)))
+		log.write('Runtime: {0} seconds\n'.format(round(default_timer() - starttime, 3)))
+	
 	
 	if completelog == False:
 		log.close()
