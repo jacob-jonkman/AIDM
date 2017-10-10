@@ -5,24 +5,14 @@ from timeit import default_timer
 import otherFunctions as oF
 import sys #for writing print statements to a log file
 
-numrows = int(2**20)
-numbits = 20
+numrows = int(1000000)
+numbits = 30
 
 #put all print statements in the log file. Set to false if you want only an
 #incomplete log, but get output in the terminal
 completelog = False
 if completelog:
 	sys.stdout = open("Log.txt", "w")
-
-def bitstringsToInt(bitstrings):
-	"""
-	Converts a bitstring array to an int array
-	"""
-	intarray = np.zeros(len(bitstrings), dtype = int)
-	for i in np.arange(len(bitstrings)):
-		intarray[i] = int(bitstrings[i], 2)
-		
-	return intarray
 
 def counttrue(bitstrings, printprogress = True):
 	"""
@@ -31,7 +21,7 @@ def counttrue(bitstrings, printprogress = True):
 	print('\n--------- True Count ---------')
 	
 	#array containing whether or not each integer exists in the bitstrings
-	intfreq = np.zeros(2**numbits, dtype = bool)
+	stringsfound = np.zeros(2**numbits, dtype = bool)
 
 	#for displaying the progress
 	looplength = len(bitstrings)
@@ -40,11 +30,11 @@ def counttrue(bitstrings, printprogress = True):
 		if printprogress:
 			oF.progress(i, looplength)
 			
-		intfreq[int(bitstrings[i], 2) - 1] = True
+		stringsfound[bitstrings[i] - 1] = True
 	
 	print('\n') #make space for new prints
 	
-	return np.count_nonzero(intfreq)
+	return np.count_nonzero(stringsfound)
 
 def main():
 	np.set_printoptions(threshold=np.nan)
@@ -57,8 +47,7 @@ def main():
 		print("Loaded bitstrings from file...")
 	except:
 		print("Creating new bitstrings and saving them to file...")
-		bitarray = np.random.randint(2, size=(numrows, numbits))
-		bitstrings = np.array([str(e).replace(' ','').replace('[','').replace(']','') for e in bitarray])
+		bitstrings = np.random.randint(2**numbits, size=(numrows))
 		
 		#only save the data if it is not too large
 		if numrows * numbits < 5e7:
@@ -81,7 +70,7 @@ def main():
 	
 	#loglog counting
 	starttime = default_timer()
-	llcount = llc.loglogcount(bitstrings, 8)
+	llcount = llc.loglogcount(bitstrings, 10, numbits, printprogress=True)
 	print("Loglog count: {0}, RAE: {1}%".format(llcount, round(np.abs(truecount - llcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
@@ -90,7 +79,7 @@ def main():
 	
 	#probabilistic counting
 	starttime = default_timer()
-	ptcount = pt.prob_count(bitstrings, printprogress = True)
+	ptcount = pt.prob_count(bitstrings, numbits, printprogress = True)
 	print("Probabilistic count: {0}, RAE: {1}%".format(ptcount, round(np.abs(truecount - ptcount)/truecount * 100., 3)))
 	print('Runtime: {0} seconds'.format(round(default_timer() - starttime, 3)))
 	if completelog == False:
