@@ -3,7 +3,8 @@ import otherFunctions as oF
 
 def loglogcount(bitstrings, k, numbits, printprogress = True):
 
-	print('\n--------- LogLog Count ---------')
+	if printprogress:
+		print('\n--------- LogLog Count ---------')
 
 	buckets = 2**k
 	M = np.zeros(buckets, dtype=int)
@@ -20,6 +21,7 @@ def loglogcount(bitstrings, k, numbits, printprogress = True):
 	
 	exponent = 2**(sum(M) / buckets)
 	
-	print('\n')
+	if printprogress:
+		print('\n')
 	
 	return int(alpha * buckets * exponent)

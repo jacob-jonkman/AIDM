@@ -3,7 +3,8 @@ import otherFunctions as oF
 
 def prob_count(bitstrings, numbits, printprogress = True):
 
-	print('\n--------- Cointoss ---------')
+	if printprogress:
+		print('\n--------- Cointoss ---------')
 	
 	rholist = np.zeros(numbits) #list recording which 1 bits have been found
 	
@@ -14,9 +15,6 @@ def prob_count(bitstrings, numbits, printprogress = True):
 			oF.progress(i, looplength)
 		rholist[oF.rho(bitstrings[i], numbits)] = 1
 	
-	print('\n') #make space for new prints
-	print('Rho:', rholist)
-	
 	#find up to which element in rho we have a 1 (so, find R)
 	R = 0
 	for r in rholist:
@@ -24,6 +22,9 @@ def prob_count(bitstrings, numbits, printprogress = True):
 			break
 		R += 1
 		
-	print('R:', R)
+	if printprogress:
+		print('\n') #make space for new prints
+		print('Rho:', rholist)
+		print('R:', R)
 	
 	return 2**R
