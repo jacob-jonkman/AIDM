@@ -135,7 +135,7 @@ def plotTwoValues(x, y1, y2, xlabel, y1label, y2label, title, filename):
 	import matplotlib.ticker as tkr
 	
 	plt.close()
-	
+	plt.rc('text', usetex=True)
 	#change plot style, add spines
 	#sns.set_style("white")
 	sns.set_style("ticks")
