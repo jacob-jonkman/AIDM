@@ -147,6 +147,10 @@ def plotTwoValues(x, y1, y2, xlabel, y1label, y2label, title, filename):
 	ax2 = ax1.twinx()
 	#plots first line
 	lns1 = ax1.scatter(x, y1, alpha = 0.3, color = 'r')
+	#set the ytick labels for this first y axis to scientific notation
+	if np.max(y1) > 1e4:
+		ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+		
 	#plots second line
 	lns2 = ax2.scatter(x, y2, alpha = 0.3, color = 'b')
 	#Changes the colour of the tick labels to match the line colour
@@ -159,7 +163,12 @@ def plotTwoValues(x, y1, y2, xlabel, y1label, y2label, title, filename):
 	ax1.grid(False)
 	ax2.grid(False)
 	
+	#set the xtick labels to scientific notation
 	plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+	
+	#increase left spacing 
+	fig = plt.gcf()
+	fig.subplots_adjust(left = 0.11, right = 0.9)
 		
 	ax1.set_ylabel(y1label)
 	ax2.set_ylabel(y2label)
@@ -178,11 +187,11 @@ def plotDifferentSettings():
 	resloc = 'Different_settings_results'
 
 	#the numrows limits
-	nrows_lims = [1e4, 6e6]
-	nbits_lims = [20, 20]
+	nrows_lims = [1e4, 1e7]
+	nbits = 30
 	
 	#string for the file names of the to be saved files
-	settingsstr = 'nrows={:.1e}--{:.1e}_nbits={}--{}'.format(nrows_lims[0], nrows_lims[1], nbits_lims[0], nbits_lims[1])
+	settingsstr = 'nrows={:.0e}--{:.0e}_nbits={}'.format(nrows_lims[0], nrows_lims[1], nbits)
 	
 	#the relative approximation error for the different counting algorithms
 	ll_RAE = []
@@ -196,7 +205,7 @@ def plotDifferentSettings():
 
 	#the different settings we want to test
 	numrows = np.linspace(nrows_lims[0], nrows_lims[1], num = 15, dtype = int)
-	numbits = np.array([20])
+	numbits = np.array([nbits])
 	
 	looplength = len(numrows)
 	
@@ -228,9 +237,9 @@ def plotDifferentSettings():
 	plt.title('RAE of loglog count for different number of rows. \nNumbits = 20')
 	plt.savefig('./Figures/RAE_loglog.png', dpi = 200)
 	'''
-	plotTwoValues(numrows, ll_RAE, ll_runtime, 'Number of rows', 'RAE [%]', 'Runtime [s]', 'RAE and runtime of loglog count for different number of rows. \nNumbits = {}'.format(nbits_lims[0]), 'RAEandRuntime_loglog_{0}.png'.format(settingsstr))
+	plotTwoValues(numrows, ll_RAE, ll_runtime, 'Number of rows', 'RAE [\%]', 'Runtime [s]', 'RAE and runtime of loglog count for different number of rows. \nNumbits = {}'.format(nbits), 'RAEandRuntime_loglog_{0}.pdf'.format(settingsstr))
 	
-	plotTwoValues(numrows, prob_RAE, prob_runtime, 'Number of rows', 'RAE [%]', 'Runtime [s]', 'RAE and runtime of probabilisic count for different \nnumber of rows. Numbits = {}'.format(nbits_lims[0]), 'RAEandRuntime_prob_{0}.png'.format(settingsstr))
+	plotTwoValues(numrows, prob_RAE, prob_runtime, 'Number of rows', 'RAE [\%]', 'Runtime [s]', 'RAE and runtime of probabilisic count for different \nnumber of rows. Numbits = {}'.format(nbits), 'RAEandRuntime_prob_{0}.pdf'.format(settingsstr))
 	
 
 def main():
