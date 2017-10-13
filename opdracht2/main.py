@@ -230,17 +230,86 @@ def plotDifferentSettings():
 			np.array([ll_RAE, prob_RAE, comb_RAE, tc_runtime, ll_runtime, prob_runtime, comb_runtime]), 
 			header = '#ll_RAE, prob_RAE, comb_RAE, tc_runtime, ll_runtime, prob_runtime, comb_runtime')
 	
-	'''
-	plt.scatter(numrows, ll_RAE, alpha = 0.3)
-	plt.xlabel('Number of rows')
-	plt.ylabel('RAE [%]')
-	plt.title('RAE of loglog count for different number of rows. \nNumbits = 20')
-	plt.savefig('./Figures/RAE_loglog.png', dpi = 200)
-	'''
 	plotTwoValues(numrows, ll_RAE, ll_runtime, 'Number of rows', 'RAE [\%]', 'Runtime [s]', 'RAE and runtime of loglog count for different number of rows. \nNumbits = {}'.format(nbits), 'RAEandRuntime_loglog_{0}.pdf'.format(settingsstr))
 	
 	plotTwoValues(numrows, prob_RAE, prob_runtime, 'Number of rows', 'RAE [\%]', 'Runtime [s]', 'RAE and runtime of probabilisic count for different \nnumber of rows. Numbits = {}'.format(nbits), 'RAEandRuntime_prob_{0}.pdf'.format(settingsstr))
+
+
+def plotInSingleFig():
+	import seaborn as sns
+	import pandas as pd
 	
+	plt.close()
+	
+	#save location of the results
+	resloc = 'Different_settings_results'
+	
+	#the numrows limits
+	nrows_lims = [1e4, 6e6]
+	numrows = np.linspace(nrows_lims[0], nrows_lims[1], num = 15, dtype = int)
+	#number of bits
+	numbits = np.array([20, 25, 30])
+	
+	#the data frame where everything will be stored
+	data = pd.DataFrame()
+	
+	#loop over the different number of bins for which the results were already calculated
+	for nbit in numbits:
+		#string for the save files=
+		settingsstr = 'nrows={:.0e}--{:.0e}_nbits={}'.format(nrows_lims[0], nrows_lims[1], nbit)
+	
+		#load the data from a single run
+		(ll_RAE, prob_RAE, comb_RAE, tc_runtime, ll_runtime, prob_runtime, comb_runtime) = np.loadtxt('./{0}/diffset_results_{1}.txt'.format(resloc, settingsstr))
+	
+		#create new local data frame
+		#df = pd.DataFrame({'ll_RAE':ll_RAE, 'prob_RAE':prob_RAE, 'comb_RAE':comb_RAE, 
+		#				'tc_runtime':tc_runtime, 'll_runtime':ll_runtime, 'prob_runtime':prob_runtime, 
+		#				'comb_runtime':comb_runtime, 'numrows':numrows, 'numbits':np.full(len(numrows), nbit)})
+		'''
+		df = pd.DataFrame({'RAE':np.append(ll_RAE, prob_RAE), 
+						'Runtime':np.append(ll_runtime, prob_runtime), 
+						'numrows':np.tile(numrows, 2), 'numbits':np.full(len(numrows) * 2, nbit),
+						'Algorithm':np.append(np.full(len(numrows), 'LogLog', dtype = str), 
+						np.full(len(numrows), 'Probabilistic', dtype = str))})
+		'''	
+		df = pd.DataFrame({'RAE [\%]':np.append(ll_RAE, prob_RAE), 
+						'Runtime':np.append(ll_runtime, prob_runtime), 
+						'numrows':np.tile(numrows, 2), 'numbits':np.full(len(numrows) * 2, nbit),
+						'Algorithm':np.append(np.tile(['LogLog'], len(numrows)), 
+						np.tile(['Probabilistic'], len(numrows)))})
+	
+		#append the local data frame to the big one
+		data = data.append(df, ignore_index = True)
+	
+		# Set style of scatterplot
+	plt.rc('text', usetex=True)
+	sns.set_context("notebook", font_scale=1.1)
+	sns.set_style("ticks", {'axes.grid' : True})
+		
+	'''
+	fig, axs = plt.subplots(ncols=2)
+	sns.regplot(x='numrows', y='ll_RAE', data=df, fit_reg = False, ax=axs[0])
+	sns.regplot(x='numrows', y='prob_RAE', data=df, fit_reg = False, ax=axs[0])
+	#sns.regplot(x='value', y='wage', data=df_melt, ax=axs[1])
+	#sns.boxplot(x='education',y='wage', data=df_melt, ax=axs[2])
+	'''
+
+	g = sns.FacetGrid(data, row="numbits", col = 'Algorithm', sharey = 'none', sharex = 'col', margin_titles=True) 
+	g = (g.map(plt.scatter, "numrows", "RAE [\%]")).fig.subplots_adjust(wspace=.25, hspace=.05)
+	
+	fig = plt.gcf()
+	#change overall size
+	fig.set_size_inches(7.5, 9)
+	#decrease spacing on the left
+	fig.subplots_adjust(left = 0.12)
+	
+	#set the xtick labels to scientific notation
+	#ax = plt.gca()
+	#ax.get_xaxis().get_major_formatter().set_scientific(True)
+	
+	filename = 'All_settings_RAE.pdf'
+	plt.savefig('./Figures/' + filename, dpi = 200, bbox_inches = 'tight')
+	plt.show()
 
 def main():
 	np.set_printoptions(threshold=np.nan)
@@ -251,7 +320,9 @@ def main():
 	#results = runCounts(int(1000000), 30)
 	
 	#plot the results of the count algorithms for different settings
-	plotDifferentSettings()
+	#plotDifferentSettings()
+	
+	plotInSingleFig()
 	
 
 if __name__ == "__main__":
