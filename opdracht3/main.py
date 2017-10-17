@@ -1,6 +1,11 @@
 import numpy as np
+import minhash as mh
+from time import time
+
+num_hashes = 100
 
 def main():
+	start_time = time()
 	raw_data = np.load("user_movie.npy")
 	
 	np.random.seed(42)
@@ -40,6 +45,10 @@ def main():
 		
 		#print(user, matrix[user].shape)
 	
+	for i in np.arange(num_hashes):
+		min_hash(matrix, num_movies)
 	
+	print("Program took %s seconds to execute" % (time() - start_time))
+
 if __name__ == "__main__":
 	main()
