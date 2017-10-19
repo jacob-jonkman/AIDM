@@ -1,10 +1,13 @@
 import numpy as np
 import minhash as mh
+
 from time import time
+from scipy.sparse import coo_matrix
 
 num_hashes = 100
 
 def main():
+	## TODO: Command line parse ##
 	start_time = time()
 	raw_data = np.load("user_movie.npy")
 	
@@ -44,9 +47,8 @@ def main():
 		user_start += user_count
 		
 		#print(user, matrix[user].shape)
-	
-	for i in np.arange(num_hashes):
-		min_hash(matrix, num_movies)
+
+	mh.min_hash(matrix, num_movies, num_users, 10)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 
