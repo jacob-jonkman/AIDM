@@ -2,13 +2,23 @@ import numpy as np
 
 bands = 10
 
-def jaccard(matrix, user1, user2):
-	union = len(np.union1d(matrix[user1], matrix[user2]))
-	intersect = len(np.intersect1d(matrix[user1], matrix[user2]))
-	return intersect/union
+def jaccard(row1, row2):
+	union = len(np.union1d(row1, row2))
+	intersect = len(np.intersect1d(row1, row2))
+	if (intersect/union)>0.5:
+		print("union:", np.union1d(row1, row2), "intersect", np.intersect1d(row1, row2))
+	if union > 0:
+		return intersect/union
+	else: 
+		return 0
 
-def dohash(row, num_hashes, bandwidth = 4):
-	return(np.sum(np.array([row[i:i+bandwidth]])**2) for i in np.arange(0, num_hashes, bandwidth))
+"""def dohash(row, num_hashes, bandwidth = 4):
+	hashlist = []
+	for i in np.arange(0, num_hashes, bandwidth):
+		string = row[i:i+bandwidth]
+		hashlist.append(int(''.join(str(e) for e in string)))
+	return hashlist
+"""
 
 def min_hash(matrix, num_movies, num_users, num_hashes):
 	A = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
@@ -29,7 +39,7 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 	
 	"""
 	sigMatrix = []
-	for row in matrix[1:]:
+	for row in matrix[1:1000]:
 		signature = []
 		
 		# For each row, find the signatures for all the different hashes #
@@ -39,20 +49,18 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 			signature.append(np.min(hashcodes))
 		
 		sigMatrix.append(signature)
-	
-	# sigMatrix bevat nu voor alle users die we hebben bekeken de signature row. #
-	#print(sigMatrix)
-	print(len(sigMatrix))
-	
-	buckets = {key: [] for key in np.arange(2**20)}
-	
+		# sigMatrix bevat nu voor alle users die we hebben bekeken de signature row. #	
+
+	# Hash bands to buckets #
+	buckets = {}	
 	for row, i in zip(sigMatrix, np.arange(len(sigMatrix))):
-		hashed_row = dohash(row, num_hashes)
-		for band in hashed_row:
-			if(buckets[band]):
-				buckets[band].append(i)
-			else:
-				buckets[band] = [i]
+		bands = np.split(np.array(row), 5)
+		for band in bands:
+			buckets.setdefault(tuple(band),[]).append(i)
+	
+	for k in buckets.keys():
+		print(buckets[k])
+	
 	true = 0
 	false = 0
 	for k in buckets.keys():
@@ -61,9 +69,10 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 				for j in np.arange(i+1, len(buckets[k])):
 					user1 = buckets[k][i]
 					user2 = buckets[k][j]
-					jaccardval = jaccard(matrix, user1, user2)
-					if jaccardval > 0.5:
-						print(user1, user2)
+					
+					jaccardval = jaccard(matrix[user1], matrix[user2])
+					if jaccardval > 0.5 and user1 != user2:
+						print(user1, user2, len(buckets[k]), k, buckets[k])
 						true += 1
 					else:
 						false += 1

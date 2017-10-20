@@ -28,6 +28,8 @@ def main():
 	movie_counts = np.bincount(raw_data[:,1])	
 	max_movie_count = np.max(movie_counts)
 	print(movie_counts)
+	#m = coo_matrix(raw_data)
+	#matrix = m.tocsr()
 	
 	# The user,movie matrix to be filled
 	matrix = np.array([np.zeros(user_counts[i]) for i in np.arange(num_users)])
@@ -48,7 +50,7 @@ def main():
 		
 		#print(user, matrix[user].shape)
 
-	mh.min_hash(matrix, num_movies, num_users, 10)
+	mh.min_hash(matrix, num_movies, num_users, 20)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 
