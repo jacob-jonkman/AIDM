@@ -50,7 +50,7 @@ def main():
 		
 		#print(user, matrix[user].shape)
 
-	mh.min_hash(matrix, num_movies, num_users, 50)
+	mh.min_hash(matrix, num_movies, num_users, 20)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 

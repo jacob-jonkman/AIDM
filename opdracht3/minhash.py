@@ -1,11 +1,13 @@
 import numpy as np
 from time import time
-
 bands = 10
 
 def jaccard(row1, row2):
+	length1 = len(row1)
+	length2 = len(row2)
 	union = len(np.union1d(row1, row2))
-	intersect = len(np.intersect1d(row1, row2))
+	intersect = length1+length2-union
+	
 	if union > 0:
 		return intersect/union
 	else: 
@@ -34,19 +36,19 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 	# Hash bands to buckets #
 	buckets = {}	
 	for sigrow, i in zip(sigMatrix, np.arange(len(sigMatrix))):
-		bands = np.split(np.array(sigrow), 10)
+		bands = np.split(np.array(sigrow), 5)
 		for band in bands:
 			buckets.setdefault(tuple(band),[]).append(i)
 	
 	print("Loop took %s seconds to execute" % (time() - start_time))
-		
+	
 	true = 0
 	false = 0
 	for k in buckets.keys():
 		if len(buckets[k]) > 1:
 			for i in np.arange(len(buckets[k])):
+				user1 = buckets[k][i]
 				for j in np.arange(i+1, len(buckets[k])):
-					user1 = buckets[k][i]
 					user2 = buckets[k][j]
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
@@ -56,4 +58,4 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 						else:
 							false += 1
 	print(true, false)
-
+	
