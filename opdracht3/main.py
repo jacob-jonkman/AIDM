@@ -11,6 +11,9 @@ def main():
 	start_time = time()
 	raw_data = np.load("user_movie.npy")
 	
+	#clear the results file
+	with open("./results.txt", "w"): pass
+	
 	np.random.seed(42)
 	
 	# Find number of users and movies. Each user and movie ID actually occurs #
