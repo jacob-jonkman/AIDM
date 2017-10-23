@@ -32,8 +32,6 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 	B = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	c = 2999
 	
-	results = []
-	
 	sigMatrix = []
 	for row in matrix[1:]:
 		signature = []
@@ -57,18 +55,30 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 	#lower than 0.5
 	true = 0
 	
+	# Keep a list of (user1,user2) pairs to spot duplicates #
+	results = []
+	
 	#loop over all the buckets
 	for k in buckets.keys():
 		if len(buckets[k]) > 1: #if there are two or more users in the bucket
+			
 			#loop over the users in the bucket
 			for i in np.arange(len(buckets[k])):
 				user1 = buckets[k][i]
+				
 				#loop over all the users 
 				for j in np.arange(i+1, len(buckets[k])):
 					user2 = buckets[k][j]
+					
+					# Filter pairs which have lengths such that their Jaccard similarity #
+					# cannot reach 0.5. Also filter pairs where user1 == user2 #
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
+						
+						# Only look at pairs that have a jaccard similarity > 0.5 #
 						if jaccardval > 0.5:
+						
+							# Filter duplicate pairs
 							if (user1,user2) not in results:
 								print(user1, user2)
 								results.append((user1,user2))
