@@ -1,20 +1,25 @@
 import numpy as np
 import minhash as mh
-
+import argparse
 from time import time
 from scipy.sparse import coo_matrix
 
 num_hashes = 100
 
 def main():
-	## TODO: Command line parse ##
+	# Parse command line arguments
+	parser = argparse.ArgumentParser(description='Process some integers.')
+	parser.add_argument('seed', type=int)
+	parser.add_argument('datapath', type=str)
+	args = parser.parse_args()
+	
 	start_time = time()
-	raw_data = np.load("user_movie.npy")
+	raw_data = np.load(args.datapath)
 	
 	#clear the results file
 	with open("./results.txt", "w"): pass
 	
-	np.random.seed(42)
+	np.random.seed(args.seed)
 	
 	# Find number of users and movies. Each user and movie ID actually occurs #
 	num_users = np.max(raw_data[:,0])
@@ -51,7 +56,7 @@ def main():
 		# Compute the start position of the next user in the raw data #
 		user_start += user_count
 
-	mh.min_hash(matrix, num_movies, num_users, 40)
+	mh.min_hash(matrix, num_movies, num_users, 72, num_bands=12)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 

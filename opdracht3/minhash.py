@@ -1,6 +1,5 @@
 import numpy as np
 from time import time
-bands = 10
 
 def jaccard(row1, row2):
 	length1 = len(row1)
@@ -46,9 +45,6 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 		
 		sigMatrix.append(signature)
 
-	print("begin loop")
-	start_time = time()
-	
 	# Hash bands to buckets #
 	buckets = {}	
 	for sigrow, i in zip(sigMatrix, np.arange(len(sigMatrix))):
@@ -61,7 +57,7 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 	#the count of users that had a jaccard similarity larger than 0.5 and those 
 	#lower than 0.5
 	true = 0
-	false = 0
+	false = 0	
 	
 	#loop over all the buckets
 	for k in buckets.keys():
@@ -75,7 +71,7 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
 						if jaccardval > 0.5:
-							print(user1, user2, len(buckets[k]), k, buckets[k])
+							print(user1, user2)
 							
 							#write the output to file 
 							with open("./results.txt", "a") as f:
