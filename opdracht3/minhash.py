@@ -12,21 +12,21 @@ def jaccard(row1, row2):
 	else: 
 		return 0
 
-"""
-	Determines which users in a user-movie data have a jaccard similarity of at 
-	least 0.5. Saves results (user user pairs) to 'results.txt'.
-	
-	Input:
-		matrix (int, 2d numpy array): the matrix containing the users and the movies 
-		which they rated.\n
-		num_movies (int): the total amount of unique movies.\n
-		num_users (int): the total amount of unique users.\n
-		num_hashes (int): the number of hashes there will be used for the minhashing
-		algorithm.\n
-		num_bands (int): the number of bands that the signature of a user will be 
-		split in.
-"""
 def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
+	"""
+		Determines which users in a user-movie data have a jaccard similarity of at 
+		least 0.5. Saves results (user user pairs) to 'results.txt'.
+	
+		Input:
+			matrix (int, 2d numpy array): the matrix containing the users and the movies 
+			which they rated.\n
+			num_movies (int): the total amount of unique movies.\n
+			num_users (int): the total amount of unique users.\n
+			num_hashes (int): the number of hashes there will be used for the minhashing
+			algorithm.\n
+			num_bands (int): the number of bands that the signature of a user will be 
+			split in.
+	"""
 	#the variables needed for the minhashing
 	A = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	B = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
