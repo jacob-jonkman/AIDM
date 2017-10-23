@@ -19,7 +19,7 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 	c = 2999
 	
 	sigMatrix = []
-	for row in matrix[1:]:
+	for row in matrix[1:1000]:
 		signature = []
 		
 		# For each row, find the signatures for all the different hashes #
@@ -52,8 +52,11 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 					user2 = buckets[k][j]
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
-						if jaccardval > 0.5:
+						if jaccardval > 0.3:
 							print(user1, user2, len(buckets[k]), k, buckets[k])
+							#write the output to file 
+							with open("./results.txt", "a") as f:
+								f.write("{0}, {1}\n".format(user1, user2))
 							true += 1
 						else:
 							false += 1
