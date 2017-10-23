@@ -13,13 +13,29 @@ def jaccard(row1, row2):
 	else: 
 		return 0
 
-def min_hash(matrix, num_movies, num_users, num_hashes):
+def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
+	"""
+	Determines which users in a user-movie data have a jaccard similarity of at 
+	least 0.5. Saves results (user user pairs) to 'results.txt'.
+	
+	Input:
+		matrix (int, 2d numpy array): the matrix containing the users and the movies 
+		which they rated.\n
+		num_movies (int): the total amount of unique movies.\n
+		num_users (int): the total amount of unique users.\n
+		num_hashes (int): the number of hashes there will be used for the minhashing
+		algorithm.\n
+		num_bands (int): the number of bands that the signature of a user will be 
+		split in.
+	"""
+	
+	#the variables needed for the minhashing
 	A = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	B = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	c = 2999
 	
 	sigMatrix = []
-	for row in matrix[1:1000]:
+	for row in matrix[1:]:
 		signature = []
 		
 		# For each row, find the signatures for all the different hashes #
@@ -29,36 +45,45 @@ def min_hash(matrix, num_movies, num_users, num_hashes):
 			signature.append(np.min(hashcodes))
 		
 		sigMatrix.append(signature)
-		# sigMatrix bevat nu voor alle users die we hebben bekeken de signature row. #	
 
 	print("begin loop")
 	start_time = time()
+	
 	# Hash bands to buckets #
 	buckets = {}	
 	for sigrow, i in zip(sigMatrix, np.arange(len(sigMatrix))):
-		bands = np.split(np.array(sigrow), 5)
+		bands = np.split(np.array(sigrow), num_bands)
 		for band in bands:
 			buckets.setdefault(tuple(band),[]).append(i)
 	
 	print("Loop took %s seconds to execute" % (time() - start_time))
 	
+	#the count of users that had a jaccard similarity larger than 0.5 and those 
+	#lower than 0.5
 	true = 0
 	false = 0
+	
+	#loop over all the buckets
 	for k in buckets.keys():
-		if len(buckets[k]) > 1:
+		if len(buckets[k]) > 1: #if there are two or more users in the bucket
+			#loop over the users in the bucket
 			for i in np.arange(len(buckets[k])):
 				user1 = buckets[k][i]
+				#loop over all the users 
 				for j in np.arange(i+1, len(buckets[k])):
 					user2 = buckets[k][j]
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
-						if jaccardval > 0.3:
+						if jaccardval > 0.5:
 							print(user1, user2, len(buckets[k]), k, buckets[k])
+							
 							#write the output to file 
 							with open("./results.txt", "a") as f:
 								f.write("{0}, {1}\n".format(user1, user2))
+								
 							true += 1
 						else:
 							false += 1
+							
 	print(true, false)
 	

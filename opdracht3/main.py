@@ -50,10 +50,8 @@ def main():
 		
 		# Compute the start position of the next user in the raw data #
 		user_start += user_count
-		
-		#print(user, matrix[user].shape)
 
-	mh.min_hash(matrix, num_movies, num_users, 20)
+	mh.min_hash(matrix, num_movies, num_users, 40)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 
