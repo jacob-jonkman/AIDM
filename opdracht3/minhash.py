@@ -12,8 +12,7 @@ def jaccard(row1, row2):
 	else: 
 		return 0
 
-def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
-	"""
+"""
 	Determines which users in a user-movie data have a jaccard similarity of at 
 	least 0.5. Saves results (user user pairs) to 'results.txt'.
 	
@@ -26,12 +25,14 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 		algorithm.\n
 		num_bands (int): the number of bands that the signature of a user will be 
 		split in.
-	"""
-	
+"""
+def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 	#the variables needed for the minhashing
 	A = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	B = np.array([np.random.randint(0, num_movies) for i in np.arange(num_hashes)])
 	c = 2999
+	
+	results = []
 	
 	sigMatrix = []
 	for row in matrix[1:]:
@@ -52,12 +53,9 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 		for band in bands:
 			buckets.setdefault(tuple(band),[]).append(i)
 	
-	print("Loop took %s seconds to execute" % (time() - start_time))
-	
 	#the count of users that had a jaccard similarity larger than 0.5 and those 
 	#lower than 0.5
 	true = 0
-	false = 0	
 	
 	#loop over all the buckets
 	for k in buckets.keys():
@@ -71,15 +69,13 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 					if user1 != user2 and len(matrix[user1]) < 2*len(matrix[user2]) and len(matrix[user1]) > len(matrix[user2])/2:
 						jaccardval = jaccard(matrix[user1], matrix[user2])
 						if jaccardval > 0.5:
-							print(user1, user2)
-							
-							#write the output to file 
-							with open("./results.txt", "a") as f:
-								f.write("{0}, {1}\n".format(user1, user2))
+							if (user1,user2) not in results:
+								print(user1, user2)
+								true += 1
 								
-							true += 1
-						else:
-							false += 1
-							
-	print(true, false)
+								#write the output to file 
+								with open("./results.txt", "a") as f:
+									f.write("{0}, {1}\n".format(user1, user2))
+								
+	print(true, "matches found")
 	

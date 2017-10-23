@@ -4,8 +4,6 @@ import argparse
 from time import time
 from scipy.sparse import coo_matrix
 
-num_hashes = 100
-
 def main():
 	# Parse command line arguments
 	parser = argparse.ArgumentParser(description='Process some integers.')
@@ -24,20 +22,15 @@ def main():
 	# Find number of users and movies. Each user and movie ID actually occurs #
 	num_users = np.max(raw_data[:,0])
 	num_movies = np.max(raw_data[:,1])
-	print(num_users, num_movies)
 	
 	# Count the number of occurrences of each user and keep in a list 	#
 	# This is used to efficiently fill the user,movie matrix 						#
 	user_counts = np.bincount(raw_data[:,0])
 	max_user_count = np.max(user_counts)
-	print(user_counts, max_user_count)
 
-	# Do the same for the movies. This is not used yet #
+	# Do the same for the movies #
 	movie_counts = np.bincount(raw_data[:,1])	
 	max_movie_count = np.max(movie_counts)
-	print(movie_counts)
-	#m = coo_matrix(raw_data)
-	#matrix = m.tocsr()
 	
 	# The user,movie matrix to be filled
 	matrix = np.array([np.zeros(user_counts[i]) for i in np.arange(num_users)])
@@ -56,7 +49,7 @@ def main():
 		# Compute the start position of the next user in the raw data #
 		user_start += user_count
 
-	mh.min_hash(matrix, num_movies, num_users, 72, num_bands=12)
+	mh.min_hash(matrix, num_movies, num_users, 78, num_bands=13)
 	
 	print("Program took %s seconds to execute" % (time() - start_time))
 
