@@ -71,11 +71,13 @@ def min_hash(matrix, num_movies, num_users, num_hashes, num_bands = 10):
 						if jaccardval > 0.5:
 							if (user1,user2) not in results:
 								print(user1, user2)
+								results.append((user1,user2))
 								true += 1
 								
 								#write the output to file 
 								with open("./results.txt", "a") as f:
 									f.write("{0}, {1}\n".format(user1, user2))
-								
+							else:
+								print("dubbel!")	
 	print(true, "matches found")
 	
